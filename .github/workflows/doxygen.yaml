@@ -1,0 +1,45 @@
+name: Generate Doxygen Documentation
+
+on:
+    push:
+        tags:
+            - "v*.*.*" # Rulează doar când un tag care începe cu 'v' urmat de versiune (ex: v1.0.0) este creat
+
+jobs:
+    generate-docs:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              # Asigură-te că descarci și submodulule dacă documentația include cod din ele
+              with:
+                  submodules: "recursive"
+
+            - name: Install Doxygen
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y doxygen graphviz # Instalează doxygen și graphviz (pentru diagrame)
+
+            - name: Generate Documentation
+              run: |
+                  # Rulează Doxygen. Presupune că ai un fișier Doxyfile în rădăcina repository-ului.
+                  # Dacă Doxyfile este în altă parte sau are alt nume, ajustează comanda.
+                  # Verifică dacă există un Doxyfile în proiect.
+                  if [ -f Doxyfile ]; then
+                    doxygen Doxyfile
+                  else
+                    echo "Doxyfile not found in the root directory. Skipping documentation generation."
+                    # Poți adăuga aici logica pentru a căuta Doxyfile în altă parte sau a genera unul default.
+                    # exit 1 # Opțional: Oprește workflow-ul dacă Doxyfile lipsește
+                  fi
+
+            - name: Upload Documentation Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: doxygen-documentation-${{ github.ref_name }} # Numele artefactului (include numele tag-ului)
+                  # Specifică calea către directorul unde Doxygen generează output-ul.
+                  # Aceasta este definită de obicei în Doxyfile (OUTPUT_DIRECTORY).
+                  # Verifică Doxyfile și ajustează 'html/' dacă este necesar.
+                  path: html/ # Ajustează această cale dacă Doxygen salvează în alt director (ex: docs/html)
+                  if-no-files-found: warn # Afișează un avertisment dacă directorul nu este găsit, în loc să eșueze
+                  retention-days: 90 # Păstrează artefactul pentru 90 de zile (opțional)
