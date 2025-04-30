@@ -1,8 +1,9 @@
-name: Run Unit Tests for last commit # Numele workflow-ului
+name: Run Unit Tests on pull request # Numele workflow-ului
 
 on:
-    push:
-        branches: [main] # Rulează doar la push pe branch-ul main
+    pull_request:
+        branches: [main] # Rulează pentru PR-uri care țintesc branch-ul main
+        types: [opened, synchronize] # Rulează la deschidere și la push-uri ulterioare pe PR
 
 jobs:
     build:
