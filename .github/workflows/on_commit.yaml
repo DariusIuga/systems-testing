@@ -1,0 +1,28 @@
+name: Run Unit Tests for last commit # Numele workflow-ului
+
+on:
+    push:
+        branches: [main] # Rulează doar la push pe branch-ul main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest # Specifică sistemul de operare pe care rulează job-ul
+
+        steps:
+            - name: Checkout code # Pasul de checkout al codului
+              uses: actions/checkout@v2 # Folosește acțiunea de checkout pentru a obține codul sursă
+
+            - name: Set up Python 3.x # Pasul de configurare a mediului Python
+              uses: actions/setup-python@v2 # Folosește acțiunea de configurare Python
+              with:
+                  python-version: "3.x" # Specifică versiunea Python dorită
+
+            - name: Install dependencies # Pasul de instalare a dependențelor
+              run: |
+                  python -m pip install --upgrade pip # Actualizează pip
+                  pip install -r requirements.txt # Instalează dependențele din requirements.txt
+
+            - name: Run tests # Pasul de rulare a testelor
+              run: |
+                  cd laboratories/cicd-documentation # Navighează în directorul laboratorului
+                  python3 -m unittest discover -s tests -p "*.py" # Rulează
