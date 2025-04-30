@@ -22,24 +22,29 @@ jobs:
 
             - name: Generate Documentation
               run: |
-                  # Rulează Doxygen. Presupune că ai un fișier Doxyfile în rădăcina repository-ului.
-                  # Dacă Doxyfile este în altă parte sau are alt nume, ajustează comanda.
-                  # Verifică dacă există un Doxyfile în proiect.
-                  if [ -f Doxyfile ]; then
-                    doxygen Doxyfile
+                  DOXYFILE_PATH="Doxyfile" # Sau calea corectă dacă nu e în rădăcină
+                  OUTPUT_PATH="doxygen_output/html" # Definește un director de ieșire clar
+
+                  if [ -f $DOXYFILE_PATH ]; then
+                    # Creează directorul de ieșire
+                    mkdir -p $(dirname "$OUTPUT_PATH") 
+                    # Rulează Doxygen suprascriind setările de ieșire
+                    (cat $DOXYFILE_PATH; echo "OUTPUT_DIRECTORY=$(dirname $OUTPUT_PATH)"; echo "GENERATE_HTML=YES"; echo "HTML_OUTPUT=$(basename $OUTPUT_PATH)") | doxygen -
+                    echo "Doxygen generation attempted into $OUTPUT_PATH"
                   else
-                    echo "Doxyfile not found in the root directory. Skipping documentation generation."
-                    # Poți adăuga aici logica pentru a căuta Doxyfile în altă parte sau a genera unul default.
-                    # exit 1 # Opțional: Oprește workflow-ul dacă Doxyfile lipsește
+                    echo "Doxyfile not found at $DOXYFILE_PATH. Skipping documentation generation."
+                    # exit 1 
                   fi
+
+            # Optional: List files for debugging
+            - name: List generated files
+              run: ls -R $(dirname "doxygen_output/html") # Listează conținutul directorului părinte
 
             - name: Upload Documentation Artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: doxygen-documentation-${{ github.ref_name }} # Numele artefactului (include numele tag-ului)
-                  # Specifică calea către directorul unde Doxygen generează output-ul.
-                  # Aceasta este definită de obicei în Doxyfile (OUTPUT_DIRECTORY).
-                  # Verifică Doxyfile și ajustează 'html/' dacă este necesar.
-                  path: html/ # Ajustează această cale dacă Doxygen salvează în alt director (ex: docs/html)
-                  if-no-files-found: warn # Afișează un avertisment dacă directorul nu este găsit, în loc să eșueze
-                  retention-days: 90 # Păstrează artefactul pentru 90 de zile (opțional)
+                  name: doxygen-documentation-${{ github.ref_name }}
+                  # Folosește aceeași cale definită mai sus
+                  path: doxygen_output/html/
+                  if-no-files-found: warn
+                  retention-days: 90
