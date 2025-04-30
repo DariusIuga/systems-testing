@@ -20,7 +20,7 @@ jobs:
             - name: Install dependencies # Pasul de instalare a dependențelor
               run: |
                   python -m pip install --upgrade pip # Actualizează pip
-                  pip install -r requirements.txt # Instalează dependențele din requirements.txt
+              #   pip install -r requirements.txt # Instalează dependențele din requirements.txt
 
             - name: Run tests # Pasul de rulare a testelor
               run: |
